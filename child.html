@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Form Example</title>
+    <style>
+        #myForm {
+            background: #aabccc54;
+            position: fixed;
+            top: 0px;
+            height: 100vh;
+            width: 90vw;
+            padding-left: 5px;
+            padding-right: 5px;
+            margin-left: 2px;
+            margin-right: 2px;
+            font-size: 16px;
+        }
+
+        .typeInput {
+            background: white;
+            width: 89vw;
+            height: 25px;
+            border-radius: 4px;
+            border: none;
+            margin-top: 5px;
+            margin-bottom: 11px;
+            font-size: 15px;
+        }
+
+        .submit-btn {
+            margin-top: 12px;
+            background: #06804b;
+            padding: 2px;
+            border: none;
+            border-radius: 4px;
+            color: aliceblue;
+        }
+    </style>
+</head>
+
+<body>
+    <form id="myForm" onsubmit="return validateForm();">
+        <p>Can you please provide your personal details:</p>
+        <label for="name">Name:</label><br>
+        <input type="text" class="typeInput" id="name" name="name">
+        <br>
+        <label>Date of Birth:</label><br>
+        <input type="date" id="date" class="typeInput" name="date">
+        <br>
+        <label for="contact">Contact Number:</label><br>
+        <input type="tel" id="contact" class="typeInput" name="contact">
+        <br>
+        <label for="country">Country:</label><br>
+        <select id="country" class="typeInput" name="country" onchange="loadStates()">
+            <option value="">Select a country</option>
+        </select>
+        <br>
+        <label for="state">State:</label><br>
+        <select id="state" class="typeInput" name="state">
+            <option value="">Select a state</option>
+        </select>
+        <br>
+        <label for="email">Email:</label><br>
+        <input type="text" id="email" class="typeInput" name="email">
+        <br>
+        <input type="submit" class="submit-btn" value="Submit">
+    </form>
+    <!-- <div id="container"></div> -->
+    <script>
+        const Result =
+            // Load countries from API
+            fetch('https://raw.githubusercontent.com/stefanbinder/countries-states/master/countries.json')
+                .then(response => response.json())
+                .then(countries => {
+                    const countrySelect = document.getElementById('country');
+                    for (const country of countries) {
+                        const option = document.createElement('option');
+                        option.value = country.name;
+                        option.text = country.name;
+                        countrySelect.add(option);
+                    }
+                })
+                .catch(error => console.error(error));
+
+        // Load states based on selected country
+        function loadStates() {
+            const countrySelect = document.getElementById('country');
+            document.getElementById('state').innerHTML = ' <option value="">Select a state</option>'
+            fetch('https://raw.githubusercontent.com/stefanbinder/countries-states/master/countries.json')
+                .then(response => response.json())
+                .then(countries => {
+                    const stateSelect = document.getElementById('state');
+                    for (const country of countries) {
+                        const option = document.createElement('option');
+                        if (countrySelect.value === country.name) {
+                            for (const state of country.states) {
+                                const option = document.createElement('option');
+                                option.value = state.name;
+                                option.text = state.name;
+                                stateSelect.add(option);
+                            }
+                        }
+                    }
+                })
+                .catch(error => console.error(error));
+
+        }
+
+        // this is Validation requirement  section 
+
+        const validationRules = {
+            name: {
+                required: true,
+                minLength: 4,
+                maxLength: 10,
+            },
+            email: {
+                email: true,
+            },
+            contact: {
+                minLength: 10,
+                maxLength: 10,
+                digits: true,
+            },
+            country: {
+                required: true,
+            },
+            state: {
+                required: true,
+            },
+        };
+
+        function validateForm() {
+
+            var result = {
+                Name: {
+                    error: ''
+                },
+                Email: {
+                    error: ''
+                },
+                Contact: {
+                    error: ''
+                },
+                Country: {
+                    error: ''
+                },
+                State: {
+                    error: ''
+                },
+                Success: "All fields are valid."
+
+            };
+            var nameObj = {
+                Name: {
+                    error: ''
+                }
+            }
+            var emailObj = {
+                Email: {
+                    error: ''
+                }
+            }
+            var contactObj = {
+                Contact: {
+                    error: ''
+                }
+            }
+            var stateObj = {
+                State: {
+                    error: ''
+                }
+            }
+            var countryObj = {
+                Country: {
+                    error: ''
+                }
+            }
+
+            // this is name validation section
+            const nameInput = document.getElementById('name');
+            if (nameInput.value.length > 0) {
+                if (!(nameInput.value.length >= validationRules.name.minLength && nameInput.value.length <= validationRules.name.maxLength)) {
+                    result.Name.error = "length should be in between 4-10 characters.";
+                }
+            }
+            else {
+                result.Name.error = "It is mandatory";
+            }
+
+            // this is email validation section
+
+            const emailInput = document.getElementById('email');
+            const email = emailInput.value.trim();
+            const emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!(emailFormat.test(email) && validationRules.email.email) && !(emailInput.value.length === 0)) {
+                result.Email.error = "Please enter your valid email."
+            }
+            // this is contact number validation section
+
+            const contactInput = document.getElementById('contact');
+            const value = contactInput.value.trim();
+            const digitRegex = /^\d+$/;
+            if (digitRegex.test(value) === validationRules.contact.digits) {
+                if (!(contactInput.value.length === validationRules.contact.minLength && contactInput.value.length === validationRules.contact.maxLength)) {
+                    result.Contact.error = "It should be 10 digits.";
+                }
+            }
+            else if (!(digitRegex.test(value) === validationRules.contact.digits) && contactInput.value.length !== 0) {
+                result.Contact.error = "It should be digits.";
+            }
+
+
+            // this is country select validation section
+
+            const countrySelect = document.getElementById('country');
+            const selectedIndex = countrySelect.selectedIndex;
+            if (selectedIndex === 0) {
+                result.Country.error = "It is mandatory.";
+            }
+            // this is state select validation section
+            const stateSelect = document.getElementById('state');
+            const stateSelectedIndex = stateSelect.selectedIndex;
+            if (stateSelectedIndex === 0) {
+                result.State.error = "It is mandatory.";
+            }
+
+            var Successmessage = {
+                Success: "All fields are valid."
+
+            };
+
+            const obj = [];
+            let i = 0;
+            if (result.Name.error !== '') {
+                nameObj.Name.error = result.Name.error;
+                obj[i++] = nameObj;
+            }
+            if (result.Email.error !== '') {
+                emailObj.Email.error = result.Email.error;
+                obj[i++] = emailObj;
+            }
+            if (result.Contact.error !== '') {
+                contactObj.Contact.error = result.Contact.error;
+                obj[i++] = contactObj;
+            } if (result.Country.error !== '') {
+                countryObj.Country.error = result.Country.error;
+                obj[i++] = countryObj;
+            } if (result.State.error !== '') {
+                stateObj.State.error = result.State.error;
+                obj[i++] = stateObj;
+            }
+
+
+            if (result.Name.error === '' && result.Email.error === '' && result.Contact.error === '' && result.Country.error === '' && result.State.error === '') {
+                window.parent.postMessage(Successmessage, '*');
+                return true;
+            } else {
+                window.parent.postMessage(obj, '*');
+                return true;
+            }
+        }
+
+    </script>
+</body>
+
+</html>

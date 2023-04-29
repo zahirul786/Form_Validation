@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Form Page Parent</title>
+    <style>
+        #form-frame {
+            border: 1px solid red;
+            width: 24vw;
+            height: 84vh;
+            margin-left: 35vw;
+            top: 0px;
+        }
+
+        .result {
+            margin-left: 35vw;
+            font-size: 19px;
+            margin-right: 35vw;
+        }
+    </style>
+</head>
+
+<body>
+    <iframe id="form-frame" src="child.html" height="400px" width="350px"></iframe>
+    <div class="result"></div>
+    <script>
+        window.addEventListener("message", function (e) {
+            document.querySelector(".result").innerHTML = "Result :".concat(JSON.stringify(e.data));
+        })
+    </script>
+</body>
+
+</html>
